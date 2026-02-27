@@ -14,9 +14,9 @@ export const POST: RequestHandler = async (event) => {
 
     const ownerId = body.owner_id || 'users:default';
 
-    const project = await createProject(validatedData.name, ownerId);
+    const project = createProject(validatedData.name, ownerId);
 
-    const apiKey = await generateApiKey(project.id!);
+    const apiKey = generateApiKey(project.id!);
 
     console.log('[INFO] project_created project_id=' + project.id + ' name=' + project.name);
 
@@ -41,7 +41,7 @@ export const GET: RequestHandler = async (event) => {
   try {
     const ownerId = event.url.searchParams.get('owner_id') || 'users:default';
 
-    const projects = await getProjectsByOwner(ownerId);
+    const projects = getProjectsByOwner(ownerId);
 
     return json<ApiResponse>({
       success: true,

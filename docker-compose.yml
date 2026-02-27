@@ -1,23 +1,4 @@
 services:
-  surrealdb:
-    image: surrealdb/surrealdb:latest
-    container_name: lighthouse-surrealdb
-    ports:
-      - "8000:8000"
-    command:
-      - start
-      - --log=info
-      - --user=root
-      - --pass=root
-      - memory
-    volumes:
-      - ./database/schema.surql:/schema.surql:ro
-    environment:
-      - SURREAL_LOG=info
-    restart: unless-stopped
-    networks:
-      - lighthouse-network
-
   app:
     build:
       context: ./lighthouse
@@ -28,16 +9,12 @@ services:
     volumes:
       - ./lighthouse:/app
       - /app/node_modules
+      - ./database:/database
+      - ./data:/app/data
     environment:
-      - SURREALDB_URL=http://surrealdb:8000
-      - SURREALDB_NS=lighthouse
-      - SURREALDB_DB=logs
-      - SURREALDB_USER=root
-      - SURREALDB_PASS=root
+      - DATABASE_PATH=/app/data/lighthouse.db
       - SESSION_SECRET=dev-secret-change-in-production
       - NODE_ENV=development
-    depends_on:
-      - surrealdb
     networks:
       - lighthouse-network
     stdin_open: true

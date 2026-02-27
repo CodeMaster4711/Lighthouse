@@ -7,44 +7,46 @@ import { nanoid } from 'nanoid';
 
 const SALT_ROUNDS = 10;
 
-export async function createUser(email: string, password: string): Promise<User> {
-  const db = await getDB();
+export function createUser(email: string, password: string): User {
+  const db = getDB();
 
-  const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+  const passwordHash = bcrypt.hashSync(password, SALT_ROUNDS);
   const id = 'users:' + nanoid();
 
-  const result = await db.create(id, {
-    email,
-    password_hash: passwordHash,
-    created_at: new Date().toISOString()
-  });
-
-  const user = result as User;
-  delete user.password_hash;
-  return user;
-}
-
-export async function getUserByEmail(email: string): Promise<User | null> {
-  const db = await getDB();
-
-  const result = await db.query<[User[]]>(
-    'SELECT * FROM users WHERE email = $email LIMIT 1',
-    { email }
+  const stmt = db.prepare(
+    "INSERT INTO users (id, email, password_hash, created_at) VALUES (?, ?, ?, datetime('now'))"
   );
 
-  return result[0]?.[0] || null;
+  stmt.run(id, email, passwordHash);
+
+  return {
+    id,
+    email,
+    created_at: new Date().toISOString()
+  };
 }
 
-export async function getUserById(id: string): Promise<User | null> {
-  const db = await getDB();
+export function getUserByEmail(email: string): User | null {
+  const db = getDB();
 
-  const result = await db.select<User>(id);
-  return result || null;
+  const stmt = db.prepare('SELECT * FROM users WHERE email = ?');
+  const user = stmt.get(email) as User | undefined;
+
+  return user || null;
 }
 
-export async function verifyPassword(user: User, password: string): Promise<boolean> {
+export function getUserById(id: string): User | null {
+  const db = getDB();
+
+  const stmt = db.prepare('SELECT * FROM users WHERE id = ?');
+  const user = stmt.get(id) as User | undefined;
+
+  return user || null;
+}
+
+export function verifyPassword(user: User, password: string): boolean {
   if (!user.password_hash) {
     return false;
   }
-  return bcrypt.compare(password, user.password_hash);
+  return bcrypt.compareSync(password, user.password_hash);
 }

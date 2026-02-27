@@ -4,33 +4,39 @@ import { getDB } from '../db';
 import type { Project } from '$lib/shared/types';
 import { nanoid } from 'nanoid';
 
-export async function createProject(name: string, ownerId: string): Promise<Project> {
-  const db = await getDB();
+export function createProject(name: string, ownerId: string): Project {
+  const db = getDB();
 
   const id = 'projects:' + nanoid();
-  const result = await db.create(id, {
+
+  const stmt = db.prepare(
+    "INSERT INTO projects (id, name, owner_id, created_at) VALUES (?, ?, ?, datetime('now'))"
+  );
+
+  stmt.run(id, name, ownerId);
+
+  return {
+    id,
     name,
     owner_id: ownerId,
     created_at: new Date().toISOString()
-  });
-
-  return result as Project;
+  };
 }
 
-export async function getProjectById(id: string): Promise<Project | null> {
-  const db = await getDB();
+export function getProjectById(id: string): Project | null {
+  const db = getDB();
 
-  const result = await db.select<Project>(id);
-  return result || null;
+  const stmt = db.prepare('SELECT * FROM projects WHERE id = ?');
+  const project = stmt.get(id) as Project | undefined;
+
+  return project || null;
 }
 
-export async function getProjectsByOwner(ownerId: string): Promise<Project[]> {
-  const db = await getDB();
+export function getProjectsByOwner(ownerId: string): Project[] {
+  const db = getDB();
 
-  const result = await db.query<[Project[]]>(
-    'SELECT * FROM projects WHERE owner_id = $owner_id ORDER BY created_at DESC',
-    { owner_id: ownerId }
-  );
+  const stmt = db.prepare('SELECT * FROM projects WHERE owner_id = ? ORDER BY created_at DESC');
+  const projects = stmt.all(ownerId) as Project[];
 
-  return result[0] || [];
+  return projects;
 }

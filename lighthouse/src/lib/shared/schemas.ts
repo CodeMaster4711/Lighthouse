@@ -8,7 +8,7 @@ export const createLogSchema = z.object({
   level: logLevelSchema,
   message: z.string().min(1).max(5000),
   source: z.string().min(1).max(255),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.any()).optional(),
   timestamp: z.string().datetime().optional()
 });
 

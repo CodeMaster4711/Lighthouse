@@ -4,7 +4,7 @@ import type { RequestEvent } from '@sveltejs/kit';
 import { getApiKeyByKey } from './repositories/api-keys';
 import { getProjectById } from './repositories/projects';
 
-export async function validateApiKey(request: Request): Promise<{ valid: boolean; projectId?: string }> {
+export function validateApiKey(request: Request): { valid: boolean; projectId?: string } {
   const authHeader = request.headers.get('Authorization');
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -14,7 +14,7 @@ export async function validateApiKey(request: Request): Promise<{ valid: boolean
   const apiKey = authHeader.substring(7);
 
   try {
-    const keyRecord = await getApiKeyByKey(apiKey);
+    const keyRecord = getApiKeyByKey(apiKey);
 
     if (!keyRecord || !keyRecord.active) {
       return { valid: false };
@@ -30,14 +30,14 @@ export async function validateApiKey(request: Request): Promise<{ valid: boolean
   }
 }
 
-export async function requireApiKey(event: RequestEvent): Promise<string> {
-  const result = await validateApiKey(event.request);
+export function requireApiKey(event: RequestEvent): string {
+  const result = validateApiKey(event.request);
 
   if (!result.valid || !result.projectId) {
     throw new Error('Invalid or missing API key');
   }
 
-  const project = await getProjectById(result.projectId);
+  const project = getProjectById(result.projectId);
   if (!project) {
     throw new Error('Project not found');
   }

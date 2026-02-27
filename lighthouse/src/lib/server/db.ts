@@ -1,45 +1,44 @@
-// Lighthouse Log Collector - SurrealDB Connection
+// Lighthouse Log Collector - SQLite Connection
 
-import { Surreal } from 'surrealdb';
-import {
-  SURREALDB_URL,
-  SURREALDB_NS,
-  SURREALDB_DB,
-  SURREALDB_USER,
-  SURREALDB_PASS
-} from '$env/static/private';
+import Database from 'better-sqlite3';
+import { readFileSync, existsSync } from 'fs';
+import { join } from 'path';
 
-let db: Surreal | null = null;
+let db: Database.Database | null = null;
 
-export async function getDB(): Promise<Surreal> {
+export function getDB(): Database.Database {
   if (db) {
     return db;
   }
 
   try {
-    db = new Surreal();
+    const dbPath = process.env.DATABASE_PATH || './data/lighthouse.db';
 
-    await db.connect(SURREALDB_URL);
-    await db.signin({
-      username: SURREALDB_USER,
-      password: SURREALDB_PASS
-    });
-    await db.use({
-      namespace: SURREALDB_NS,
-      database: SURREALDB_DB
-    });
+    db = new Database(dbPath);
+    db.pragma('journal_mode = WAL');
+    db.pragma('foreign_keys = ON');
 
-    console.log('[INFO] database_connected url=' + SURREALDB_URL);
+    const schemaPath = join(process.cwd(), '../database/schema.sql');
+    const schema = readFileSync(schemaPath, 'utf-8');
+    db.exec(schema);
+
+    const seedPath = join(process.cwd(), '../database/seed.sql');
+    if (existsSync(seedPath)) {
+      const seed = readFileSync(seedPath, 'utf-8');
+      db.exec(seed);
+    }
+
+    console.log('[INFO] database_connected path=' + dbPath);
     return db;
   } catch (error) {
     console.error('[ERROR] database_connection_failed error=' + (error instanceof Error ? error.message : 'unknown'));
-    throw new Error('Failed to connect to SurrealDB');
+    throw new Error('Failed to connect to SQLite database');
   }
 }
 
-export async function closeDB(): Promise<void> {
+export function closeDB(): void {
   if (db) {
-    await db.close();
+    db.close();
     db = null;
     console.log('[INFO] database_closed');
   }

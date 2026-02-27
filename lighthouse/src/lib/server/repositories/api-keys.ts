@@ -7,46 +7,56 @@ import { nanoid } from 'nanoid';
 const API_KEY_PREFIX = 'lh_';
 const API_KEY_LENGTH = 32;
 
-export async function generateApiKey(projectId: string): Promise<ApiKey> {
-  const db = await getDB();
+export function generateApiKey(projectId: string): ApiKey {
+  const db = getDB();
 
   const key = API_KEY_PREFIX + nanoid(API_KEY_LENGTH);
   const id = 'api_keys:' + nanoid();
 
-  const result = await db.create(id, {
+  const stmt = db.prepare(
+    "INSERT INTO api_keys (id, key, project_id, active, created_at) VALUES (?, ?, ?, 1, datetime('now'))"
+  );
+
+  stmt.run(id, key, projectId);
+
+  return {
+    id,
     key,
     project_id: projectId,
     active: true,
     created_at: new Date().toISOString()
-  });
-
-  return result as ApiKey;
+  };
 }
 
-export async function getApiKeyByKey(key: string): Promise<ApiKey | null> {
-  const db = await getDB();
+export function getApiKeyByKey(key: string): ApiKey | null {
+  const db = getDB();
 
-  const result = await db.query<[ApiKey[]]>(
-    'SELECT * FROM api_keys WHERE key = $key AND active = true LIMIT 1',
-    { key }
-  );
+  const stmt = db.prepare('SELECT * FROM api_keys WHERE key = ? AND active = 1 LIMIT 1');
+  const apiKey = stmt.get(key) as (ApiKey & { active: number }) | undefined;
 
-  return result[0]?.[0] || null;
+  if (!apiKey) return null;
+
+  return {
+    ...apiKey,
+    active: apiKey.active === 1
+  };
 }
 
-export async function getApiKeysByProject(projectId: string): Promise<ApiKey[]> {
-  const db = await getDB();
+export function getApiKeysByProject(projectId: string): ApiKey[] {
+  const db = getDB();
 
-  const result = await db.query<[ApiKey[]]>(
-    'SELECT * FROM api_keys WHERE project_id = $project_id ORDER BY created_at DESC',
-    { project_id: projectId }
-  );
+  const stmt = db.prepare('SELECT * FROM api_keys WHERE project_id = ? ORDER BY created_at DESC');
+  const keys = stmt.all(projectId) as (ApiKey & { active: number })[];
 
-  return result[0] || [];
+  return keys.map((key) => ({
+    ...key,
+    active: key.active === 1
+  }));
 }
 
-export async function deactivateApiKey(keyId: string): Promise<void> {
-  const db = await getDB();
+export function deactivateApiKey(keyId: string): void {
+  const db = getDB();
 
-  await db.merge(keyId, { active: false });
+  const stmt = db.prepare('UPDATE api_keys SET active = 0 WHERE id = ?');
+  stmt.run(keyId);
 }

@@ -4,64 +4,81 @@ import { getDB } from '../db';
 import type { LogEntry, GetLogsQuery } from '$lib/shared/types';
 import { nanoid } from 'nanoid';
 
-export async function createLog(log: Omit<LogEntry, 'id'>): Promise<LogEntry> {
-  const db = await getDB();
+export function createLog(log: Omit<LogEntry, 'id'>): LogEntry {
+  const db = getDB();
 
   const id = 'logs:' + nanoid();
-  const result = await db.create(id, {
+
+  const stmt = db.prepare(
+    'INSERT INTO logs (id, level, message, timestamp, source, metadata, project_id) VALUES (?, ?, ?, ?, ?, ?, ?)'
+  );
+
+  const timestamp = log.timestamp || new Date().toISOString();
+  const metadata = log.metadata ? JSON.stringify(log.metadata) : null;
+
+  stmt.run(id, log.level, log.message, timestamp, log.source, metadata, log.project_id);
+
+  return {
+    id,
     level: log.level,
     message: log.message,
-    timestamp: log.timestamp || new Date().toISOString(),
+    timestamp,
     source: log.source,
-    metadata: log.metadata || {},
+    metadata: log.metadata,
     project_id: log.project_id
-  });
-
-  return result as LogEntry;
+  };
 }
 
-export async function getLogs(query: GetLogsQuery, projectId: string): Promise<LogEntry[]> {
-  const db = await getDB();
+export function getLogs(query: GetLogsQuery, projectId: string): LogEntry[] {
+  const db = getDB();
 
-  let queryString = 'SELECT * FROM logs WHERE project_id = $project_id';
-  const params: Record<string, unknown> = { project_id: projectId };
+  let sql = 'SELECT * FROM logs WHERE project_id = ?';
+  const params: any[] = [projectId];
 
   if (query.level) {
-    queryString += ' AND level = $level';
-    params.level = query.level;
+    sql += ' AND level = ?';
+    params.push(query.level);
   }
 
   if (query.source) {
-    queryString += ' AND source = $source';
-    params.source = query.source;
+    sql += ' AND source = ?';
+    params.push(query.source);
   }
 
   if (query.start_date) {
-    queryString += ' AND timestamp >= $start_date';
-    params.start_date = query.start_date;
+    sql += ' AND timestamp >= ?';
+    params.push(query.start_date);
   }
 
   if (query.end_date) {
-    queryString += ' AND timestamp <= $end_date';
-    params.end_date = query.end_date;
+    sql += ' AND timestamp <= ?';
+    params.push(query.end_date);
   }
 
-  queryString += ' ORDER BY timestamp DESC';
-  queryString += ' LIMIT $limit START $offset';
-  params.limit = query.limit || 100;
-  params.offset = query.offset || 0;
+  sql += ' ORDER BY timestamp DESC';
+  sql += ' LIMIT ? OFFSET ?';
+  params.push(query.limit || 100);
+  params.push(query.offset || 0);
 
-  const result = await db.query<[LogEntry[]]>(queryString, params);
-  return result[0] || [];
+  const stmt = db.prepare(sql);
+  const rows = stmt.all(...params) as (LogEntry & { metadata: string | null })[];
+
+  return rows.map((row) => ({
+    ...row,
+    metadata: row.metadata ? JSON.parse(row.metadata) : undefined
+  }));
 }
 
-export async function getLogById(id: string, projectId: string): Promise<LogEntry | null> {
-  const db = await getDB();
+export function getLogById(id: string, projectId: string): LogEntry | null {
+  const db = getDB();
 
-  const result = await db.query<[LogEntry[]]>(
-    'SELECT * FROM $id WHERE project_id = $project_id',
-    { id, project_id: projectId }
-  );
+  const stmt = db.prepare('SELECT * FROM logs WHERE id = ? AND project_id = ?');
+  const row = stmt.get(id, projectId) as (LogEntry & { metadata: string | null }) | undefined;
 
-  return result[0]?.[0] || null;
+  if (!row) return null;
+
+  return {
+    ...row,
+    metadata: row.metadata ? JSON.parse(row.metadata) : undefined
+  };
 }
