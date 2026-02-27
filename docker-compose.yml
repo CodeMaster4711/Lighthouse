@@ -14,14 +14,35 @@ services:
       - ./database/schema.surql:/schema.surql:ro
     environment:
       - SURREAL_LOG=info
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
     restart: unless-stopped
     networks:
       - lighthouse-network
+
+  app:
+    build:
+      context: ./lighthouse
+      dockerfile: Dockerfile.dev
+    container_name: lighthouse-app
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./lighthouse:/app
+      - /app/node_modules
+    environment:
+      - SURREALDB_URL=http://surrealdb:8000
+      - SURREALDB_NS=lighthouse
+      - SURREALDB_DB=logs
+      - SURREALDB_USER=root
+      - SURREALDB_PASS=root
+      - SESSION_SECRET=dev-secret-change-in-production
+      - NODE_ENV=development
+    depends_on:
+      - surrealdb
+    networks:
+      - lighthouse-network
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
 
 networks:
   lighthouse-network:
