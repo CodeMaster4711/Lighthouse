@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/CodeMaster4711/Lighthouse/compare/v1.0.0...v1.0.1) (2026-02-27)
+
+
+### Bug Fixes
+
+* pipeline arm version ([63c73a9](https://github.com/CodeMaster4711/Lighthouse/commit/63c73a990d3f742683001036c5e07f9f18ba8fa0))
+
 # 1.0.0 (2026-02-27)
 
 
