@@ -1,0 +1,28 @@
+services:
+  surrealdb:
+    image: surrealdb/surrealdb:latest
+    container_name: lighthouse-surrealdb
+    ports:
+      - "8000:8000"
+    command:
+      - start
+      - --log=info
+      - --user=root
+      - --pass=root
+      - memory
+    volumes:
+      - ./database/schema.surql:/schema.surql:ro
+    environment:
+      - SURREAL_LOG=info
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - lighthouse-network
+
+networks:
+  lighthouse-network:
+    driver: bridge
