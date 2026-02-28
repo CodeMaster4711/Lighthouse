@@ -1,3 +1,17 @@
+# [1.1.0](https://github.com/CodeMaster4711/Lighthouse/compare/v1.0.1...v1.1.0) (2026-02-28)
+
+
+### Bug Fixes
+
+* error with logs pull ([101f66b](https://github.com/CodeMaster4711/Lighthouse/commit/101f66b65c84f8d44f63276b3c8d0e346883c2f9))
+* mock script ([8db63fb](https://github.com/CodeMaster4711/Lighthouse/commit/8db63fb9323897cc19f18a9180267feab26aff58))
+* sidebar ([ab64901](https://github.com/CodeMaster4711/Lighthouse/commit/ab64901469c1df1edd5b75f98951caf681ad200b))
+
+
+### Features
+
+* ui and mock data ([ca9397e](https://github.com/CodeMaster4711/Lighthouse/commit/ca9397efd265da9bf0db1516bd76426e699b281f))
+
 ## [1.0.1](https://github.com/CodeMaster4711/Lighthouse/compare/v1.0.0...v1.0.1) (2026-02-27)
 
 
