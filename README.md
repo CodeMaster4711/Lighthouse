@@ -61,7 +61,7 @@ Get started in seconds with Docker:
 docker pull ghcr.io/codemaster4711/lighthouse/lighthouse:latest
 
 docker run -d \
-  -p 5173:5173 \
+  -p 3000:3000 \
   -v lighthouse-data:/app/data \
   -e SESSION_SECRET=your-secret-key \
   --name lighthouse \
@@ -76,7 +76,7 @@ cd lighthouse
 docker-compose up -d
 ```
 
-Access the application at `http://localhost:5173`
+Access the application at `http://localhost:3000`
 
 ### Manual Installation
 

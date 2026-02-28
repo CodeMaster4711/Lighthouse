@@ -18,6 +18,7 @@ WORKDIR /app
 
 COPY --from=builder /app/build ./build
 COPY lighthouse/package.json ./package.json
+COPY database/ /database/
 
 RUN npm install --omit=dev
 
