@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
-	import { Chart, DoughnutController, ArcElement, Title, Tooltip, Legend } from 'chart.js';
-
-	Chart.register(DoughnutController, ArcElement, Title, Tooltip, Legend);
+	import { PieChart, Text } from "layerchart";
+	import * as Chart from "$lib/components/ui/chart/index.js";
 
 	let {
 		data
@@ -10,90 +8,61 @@
 		data: { level: string; count: number; percentage: number }[];
 	} = $props();
 
-	let canvas: HTMLCanvasElement;
-	let chart: Chart | null = null;
-
-	const levelColors: Record<string, { bg: string; border: string }> = {
-		DEBUG: { bg: 'rgba(156, 163, 175, 0.8)', border: 'rgb(156, 163, 175)' },
-		INFO: { bg: 'rgba(59, 130, 246, 0.8)', border: 'rgb(59, 130, 246)' },
-		WARN: { bg: 'rgba(251, 191, 36, 0.8)', border: 'rgb(251, 191, 36)' },
-		ERROR: { bg: 'rgba(239, 68, 68, 0.8)', border: 'rgb(239, 68, 68)' }
+	const levelColors: Record<string, string> = {
+		DEBUG: "var(--chart-1)",
+		INFO: "var(--chart-2)",
+		WARN: "var(--chart-3)",
+		ERROR: "var(--chart-4)",
 	};
 
-	function createChart() {
-		if (!canvas) return;
+	const chartData = $derived(
+		data.map((d) => ({
+			level: d.level,
+			count: d.count,
+			percentage: d.percentage,
+			color: levelColors[d.level] || "var(--chart-1)",
+		}))
+	);
 
-		if (chart) {
-			chart.destroy();
-		}
+	const chartConfig = {
+		count: { label: "Logs" },
+		DEBUG: { label: "DEBUG", color: levelColors.DEBUG },
+		INFO: { label: "INFO", color: levelColors.INFO },
+		WARN: { label: "WARN", color: levelColors.WARN },
+		ERROR: { label: "ERROR", color: levelColors.ERROR },
+	} satisfies Chart.ChartConfig;
 
-		const labels = data.map(d => d.level);
-		const counts = data.map(d => d.count);
-		const backgroundColors = data.map(d => levelColors[d.level]?.bg || 'rgba(156, 163, 175, 0.8)');
-		const borderColors = data.map(d => levelColors[d.level]?.border || 'rgb(156, 163, 175)');
-
-		chart = new Chart(canvas, {
-			type: 'doughnut',
-			data: {
-				labels,
-				datasets: [{
-					data: counts,
-					backgroundColor: backgroundColors,
-					borderColor: borderColors,
-					borderWidth: 2
-				}]
-			},
-			options: {
-				responsive: true,
-				maintainAspectRatio: false,
-				plugins: {
-					title: {
-						display: true,
-						text: 'Log Level Distribution',
-						color: 'rgb(156, 163, 175)',
-						font: {
-							size: 14,
-							weight: 'normal'
-						}
-					},
-					legend: {
-						position: 'bottom',
-						labels: {
-							color: 'rgb(156, 163, 175)',
-							padding: 15,
-							font: {
-								size: 12
-							}
-						}
-					},
-					tooltip: {
-						callbacks: {
-							label: function(context) {
-								const label = context.label || '';
-								const value = context.parsed;
-								const percentage = data[context.dataIndex].percentage;
-								return `${label}: ${value} (${percentage}%)`;
-							}
-						}
-					}
-				}
-			}
-		});
-	}
-
-	$effect(() => {
-		if (canvas && data) {
-			createChart();
-		}
-	});
-
-	onDestroy(() => {
-		if (chart) {
-			chart.destroy();
-		}
-	});
+	const totalLogs = $derived(chartData.reduce((acc, curr) => acc + curr.count, 0));
 </script>
 
-<div class="w-full h-full flex items-center justify-center">
-	<canvas bind:this={canvas}></canvas>
-</div>
+<Chart.Container config={chartConfig} class="mx-auto h-full w-full">
+	<PieChart
+		data={chartData}
+		key="level"
+		value="count"
+		c="color"
+		innerRadius={60}
+		padding={28}
+		props={{ pie: { motion: "tween" } }}
+	>
+		{#snippet aboveMarks()}
+			<Text
+				value={String(totalLogs)}
+				textAnchor="middle"
+				verticalAnchor="middle"
+				class="fill-foreground text-3xl! font-bold"
+				dy={3}
+			/>
+			<Text
+				value="Logs"
+				textAnchor="middle"
+				verticalAnchor="middle"
+				class="fill-muted-foreground! text-muted-foreground"
+				dy={22}
+			/>
+		{/snippet}
+		{#snippet tooltip()}
+			<Chart.Tooltip hideLabel />
+		{/snippet}
+	</PieChart>
+</Chart.Container>
