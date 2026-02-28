@@ -35,7 +35,7 @@
   const navfooter = $derived([
     {
       title: "Api Docs",
-      url: "https://docs.lighthouse.dev",
+      url: "/api/docs",
       icon: BookOpenIcon,
     },
   ]);
@@ -47,7 +47,7 @@
       <Sidebar.MenuItem>
         <Sidebar.MenuButton size="lg">
           {#snippet child({ props })}
-            <a href="##" {...props}>
+            <a href="/" {...props}>
               <div
                 class="flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden"
               >

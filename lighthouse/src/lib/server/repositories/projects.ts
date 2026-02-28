@@ -40,3 +40,20 @@ export function getProjectsByOwner(ownerId: string): Project[] {
 
   return projects;
 }
+
+export function getProjectByName(name: string, ownerId: string): Project | null {
+  const db = getDB();
+
+  const stmt = db.prepare('SELECT * FROM projects WHERE name = ? AND owner_id = ?');
+  const project = stmt.get(name, ownerId) as Project | undefined;
+
+  return project || null;
+}
+
+export function getOrCreateProject(name: string, ownerId: string): Project {
+  const existing = getProjectByName(name, ownerId);
+  if (existing) {
+    return existing;
+  }
+  return createProject(name, ownerId);
+}
