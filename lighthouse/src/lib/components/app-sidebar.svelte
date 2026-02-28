@@ -8,6 +8,7 @@
   import NavProjects from "./nav-projects.svelte";
   import NavSecondary from "./nav-secondary.svelte";
   import NavUser from "./nav-user.svelte";
+  import SidebarStats from "./sidebar-stats.svelte";
   import * as Sidebar from "$lib/components/ui/sidebar/index.js";
   import type { ComponentProps } from "svelte";
 
@@ -70,6 +71,7 @@
     <NavMain items={navMain} />
   </Sidebar.Content>
   <Sidebar.Footer>
+    <SidebarStats />
     <NavSecondary items={navfooter} />
   </Sidebar.Footer>
 </Sidebar.Root>
