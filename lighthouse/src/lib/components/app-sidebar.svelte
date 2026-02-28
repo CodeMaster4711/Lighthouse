@@ -8,7 +8,6 @@
   import NavSecondary from "./nav-secondary.svelte";
   import NavUser from "./nav-user.svelte";
   import * as Sidebar from "$lib/components/ui/sidebar/index.js";
-  import CommandIcon from "@lucide/svelte/icons/command";
   import type { ComponentProps } from "svelte";
 
   let {
@@ -40,10 +39,8 @@
         <Sidebar.MenuButton size="lg">
           {#snippet child({ props })}
             <a href="##" {...props}>
-              <div
-                class="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg"
-              >
-                <CommandIcon class="size-4" />
+              <div class="flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden">
+                <img src="/logo/logo.jpg" alt="Lighthouse" class="size-full object-cover" />
               </div>
               <div class="grid flex-1 text-start text-sm leading-tight">
                 <span class="truncate font-medium">Lighthouse</span>
