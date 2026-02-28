@@ -1,3 +1,10 @@
+## [1.2.5](https://github.com/CodeMaster4711/Lighthouse/compare/v1.2.4...v1.2.5) (2026-02-28)
+
+
+### Bug Fixes
+
+* api endpoint ([20dc3d9](https://github.com/CodeMaster4711/Lighthouse/commit/20dc3d92a620168e931d06aaac83691708d1d375))
+
 ## [1.2.4](https://github.com/CodeMaster4711/Lighthouse/compare/v1.2.3...v1.2.4) (2026-02-28)
 
 
