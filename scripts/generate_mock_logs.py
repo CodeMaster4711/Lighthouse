@@ -3,8 +3,10 @@ import random
 import secrets
 from datetime import datetime, timedelta
 import json
+import os
 
-DB_PATH = 'lighthouse/data/lighthouse.db'
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(SCRIPT_DIR, '..', 'lighthouse', 'data', 'lighthouse.db')
 
 PROJECTS = [
     'E-Commerce Platform',
