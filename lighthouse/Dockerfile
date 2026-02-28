@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package*.json ./
 COPY lighthouse/package.json ./lighthouse/
 
-RUN npm ci
+RUN npm install
 
 COPY lighthouse/ ./lighthouse/
 
