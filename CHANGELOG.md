@@ -1,3 +1,10 @@
+## [1.2.3](https://github.com/CodeMaster4711/Lighthouse/compare/v1.2.2...v1.2.3) (2026-02-28)
+
+
+### Bug Fixes
+
+* remove workspace indirection in dockerfile, install deps fresh per platform ([13e00d8](https://github.com/CodeMaster4711/Lighthouse/commit/13e00d8cc30f992b5eae9e7cf486e75c40a51c46))
+
 ## [1.2.2](https://github.com/CodeMaster4711/Lighthouse/compare/v1.2.1...v1.2.2) (2026-02-28)
 
 
