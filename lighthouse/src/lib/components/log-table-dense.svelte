@@ -4,6 +4,8 @@
 	import { Button } from "$lib/components/ui/button/index.js";
 	import ChevronLeftIcon from "@lucide/svelte/icons/chevron-left";
 	import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
+	import ChevronDownIcon from "@lucide/svelte/icons/chevron-down";
+	import ChevronRightIcon2 from "@lucide/svelte/icons/chevron-right";
 	import type { LogEntry } from "$lib/shared/types";
 
 	let {
@@ -21,6 +23,17 @@
 	} = $props();
 
 	const totalPages = $derived(Math.ceil(totalCount / pageSize));
+	let expandedRows = $state<Set<string>>(new Set());
+
+	function toggleRow(logId: string) {
+		const newExpanded = new Set(expandedRows);
+		if (newExpanded.has(logId)) {
+			newExpanded.delete(logId);
+		} else {
+			newExpanded.add(logId);
+		}
+		expandedRows = newExpanded;
+	}
 
 	function formatTime(timestamp: string): string {
 		const date = new Date(timestamp);
@@ -55,7 +68,11 @@
 
 	function formatMetadata(metadata: any): string {
 		if (!metadata) return '';
-		return JSON.stringify(metadata);
+		try {
+			return JSON.stringify(metadata, null, 2);
+		} catch {
+			return String(metadata);
+		}
 	}
 </script>
 
@@ -64,6 +81,7 @@
 		<Table.Root class="text-xs">
 			<Table.Header>
 				<Table.Row class="h-7 border-b">
+					<Table.Head class="h-7 px-2 py-1 font-medium w-8"></Table.Head>
 					<Table.Head class="h-7 px-2 py-1 font-medium">Time</Table.Head>
 					<Table.Head class="h-7 px-2 py-1 font-medium">Level</Table.Head>
 					<Table.Head class="h-7 px-2 py-1 font-medium">Service</Table.Head>
@@ -74,13 +92,22 @@
 			<Table.Body>
 				{#if logs.length === 0}
 					<Table.Row>
-						<Table.Cell colspan={5} class="h-28 text-center">
+						<Table.Cell colspan={6} class="h-28 text-center">
 							No logs found
 						</Table.Cell>
 					</Table.Row>
 				{:else}
 					{#each logs as log (log.id)}
-						<Table.Row class="h-7 hover:bg-muted/50">
+						<Table.Row class="h-7 hover:bg-muted/50 cursor-pointer" onclick={() => toggleRow(log.id)}>
+							<Table.Cell class="h-7 px-2 py-0.5">
+								<Button variant="ghost" size="sm" class="h-5 w-5 p-0">
+									{#if expandedRows.has(log.id)}
+										<ChevronDownIcon class="h-4 w-4" />
+									{:else}
+										<ChevronRightIcon2 class="h-4 w-4" />
+									{/if}
+								</Button>
+							</Table.Cell>
 							<Table.Cell class="h-7 px-2 py-0.5 font-mono whitespace-nowrap">
 								{formatTime(log.timestamp)}
 							</Table.Cell>
@@ -99,6 +126,37 @@
 								{truncate(formatMetadata(log.metadata), 50)}
 							</Table.Cell>
 						</Table.Row>
+						{#if expandedRows.has(log.id)}
+							<Table.Row>
+								<Table.Cell colspan={6} class="bg-muted/30 p-4">
+									<div class="space-y-2">
+										<div>
+											<div class="text-sm font-semibold mb-1">Full Message</div>
+											<div class="font-mono text-xs whitespace-pre-wrap">{log.message}</div>
+										</div>
+										{#if log.metadata}
+											<div>
+												<div class="text-sm font-semibold mb-1">Metadata</div>
+												<pre class="font-mono text-xs bg-background p-2 rounded border overflow-x-auto">{formatMetadata(log.metadata)}</pre>
+											</div>
+										{/if}
+										<div class="grid grid-cols-2 gap-2 text-xs">
+											<div>
+												<span class="font-semibold">ID:</span> <span class="font-mono">{log.id}</span>
+											</div>
+											<div>
+												<span class="font-semibold">Timestamp:</span> <span class="font-mono">{log.timestamp}</span>
+											</div>
+											{#if log.project_id}
+												<div>
+													<span class="font-semibold">Project ID:</span> <span class="font-mono">{log.project_id}</span>
+												</div>
+											{/if}
+										</div>
+									</div>
+								</Table.Cell>
+							</Table.Row>
+						{/if}
 					{/each}
 				{/if}
 			</Table.Body>
