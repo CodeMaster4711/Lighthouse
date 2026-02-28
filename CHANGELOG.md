@@ -1,3 +1,20 @@
+# [1.2.0](https://github.com/CodeMaster4711/Lighthouse/compare/v1.1.0...v1.2.0) (2026-02-28)
+
+
+### Bug Fixes
+
+* chart ([b701c00](https://github.com/CodeMaster4711/Lighthouse/commit/b701c00b0fc22258ee1fe027d759e3bf57b62f31))
+
+
+### Features
+
+* add docs ([acddb9e](https://github.com/CodeMaster4711/Lighthouse/commit/acddb9e933520111458924df26e592b4914ee163))
+* added images ([8456801](https://github.com/CodeMaster4711/Lighthouse/commit/845680149a046c144565c1ef0415a722d8944694))
+* added readme ([2ac0a87](https://github.com/CodeMaster4711/Lighthouse/commit/2ac0a8712c47a580d1d5eda9efa89d1aec4bc7b9))
+* added sidebar api docs ([1527fb4](https://github.com/CodeMaster4711/Lighthouse/commit/1527fb47fc9ea60d46f5d1d732ef52bdc040b264))
+* expandable log messages ([8a7ff5b](https://github.com/CodeMaster4711/Lighthouse/commit/8a7ff5be94a3c482f82d9627b43c00bf439a6890))
+* new dashboard ([629c1a1](https://github.com/CodeMaster4711/Lighthouse/commit/629c1a1454c9cc6c1c12eed13c3d61b82fc03a63))
+
 # [1.1.0](https://github.com/CodeMaster4711/Lighthouse/compare/v1.0.1...v1.1.0) (2026-02-28)
 
 
