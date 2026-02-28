@@ -1,3 +1,11 @@
+## [1.2.1](https://github.com/CodeMaster4711/Lighthouse/compare/v1.2.0...v1.2.1) (2026-02-28)
+
+
+### Bug Fixes
+
+* ci pipeline ([605154e](https://github.com/CodeMaster4711/Lighthouse/commit/605154ebec8b75e69357f1ff938f89ac367d229e))
+* set docker build context to repo root to include package-lock.json ([5391180](https://github.com/CodeMaster4711/Lighthouse/commit/5391180b8fa1149991b477993445f8c46743ab8a))
+
 # [1.2.0](https://github.com/CodeMaster4711/Lighthouse/compare/v1.1.0...v1.2.0) (2026-02-28)
 
 
