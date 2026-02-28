@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/CodeMaster4711/Lighthouse/compare/v1.2.1...v1.2.2) (2026-02-28)
+
+
+### Bug Fixes
+
+* use npm install in builder stage to resolve platform-specific optional deps ([2d64830](https://github.com/CodeMaster4711/Lighthouse/commit/2d64830e15a363e343152eadb877866af47b0eaf))
+
 ## [1.2.1](https://github.com/CodeMaster4711/Lighthouse/compare/v1.2.0...v1.2.1) (2026-02-28)
 
 
