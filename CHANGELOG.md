@@ -1,3 +1,10 @@
+## [1.2.4](https://github.com/CodeMaster4711/Lighthouse/compare/v1.2.3...v1.2.4) (2026-02-28)
+
+
+### Bug Fixes
+
+* copy database schema into image and correct docker run port mapping ([0d6b8a5](https://github.com/CodeMaster4711/Lighthouse/commit/0d6b8a534358cb2a612da0e8f66e31fabd07e3d4))
+
 ## [1.2.3](https://github.com/CodeMaster4711/Lighthouse/compare/v1.2.2...v1.2.3) (2026-02-28)
 
 
