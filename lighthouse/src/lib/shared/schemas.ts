@@ -9,7 +9,8 @@ export const createLogSchema = z.object({
   message: z.string().min(1).max(5000),
   source: z.string().min(1).max(255),
   metadata: z.record(z.string(), z.any()).optional(),
-  timestamp: z.string().datetime().optional()
+  timestamp: z.string().datetime().optional(),
+  project_name: z.string().min(1).max(255).optional()
 });
 
 export const getLogsQuerySchema = z.object({
