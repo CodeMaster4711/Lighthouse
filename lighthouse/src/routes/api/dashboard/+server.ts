@@ -9,14 +9,16 @@ export const GET: RequestHandler = async () => {
 
     const logFrequency = db.prepare(`
       SELECT
-        DATE(timestamp) as date,
-        l.source,
+        DATE(l.timestamp) as date,
+        p.id as project_id,
+        p.name as project_name,
         COUNT(*) as count
       FROM logs l
-      WHERE timestamp >= datetime('now', '-90 days')
-      GROUP BY DATE(timestamp), l.source
+      JOIN projects p ON l.project_id = p.id
+      WHERE l.timestamp >= datetime('now', '-90 days')
+      GROUP BY DATE(l.timestamp), p.id, p.name
       ORDER BY date ASC
-    `).all() as { date: string; source: string; count: number }[];
+    `).all() as { date: string; project_id: string; project_name: string; count: number }[];
 
     const projectStats = db.prepare(`
       SELECT

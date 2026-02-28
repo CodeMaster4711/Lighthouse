@@ -45,13 +45,16 @@
     }
   }
 
-  const serviceColors: Record<string, string> = {
-    "auth-service": "#3b82f6",
-    "api-service": "#10b981",
-    "database-service": "#f59e0b",
-    "payment-service": "#ec4899",
-    "notification-service": "#8b5cf6",
-  };
+  const CHART_COLORS = [
+    "#3b82f6",
+    "#10b981",
+    "#f59e0b",
+    "#ec4899",
+    "#8b5cf6",
+    "#ef4444",
+    "#06b6d4",
+    "#84cc16",
+  ];
 
   const filteredData = $derived.by(() => {
     if (!dashboardData?.logFrequency) return [];
@@ -76,7 +79,7 @@
           dataMap.set(dateKey, { date: new Date(item.date) });
         }
         const entry = dataMap.get(dateKey);
-        entry[item.source] = (entry[item.source] || 0) + item.count;
+        entry[item.project_name] = (entry[item.project_name] || 0) + item.count;
       });
 
     return Array.from(dataMap.values()).sort(
@@ -84,20 +87,20 @@
     );
   });
 
-  const services = $derived.by(() => {
+  const projects = $derived.by(() => {
     if (!dashboardData?.logFrequency) return [];
-    const uniqueServices = new Set(
-      dashboardData.logFrequency.map((item: any) => item.source),
+    const unique = new Set(
+      dashboardData.logFrequency.map((item: any) => item.project_name),
     );
-    return Array.from(uniqueServices);
+    return Array.from(unique) as string[];
   });
 
   const chartConfig = $derived.by(() => {
     const config: any = {};
-    services.forEach((service, index) => {
-      config[service] = {
-        label: service,
-        color: serviceColors[service] || `hsl(var(--chart-${(index % 5) + 1}))`,
+    projects.forEach((project, index) => {
+      config[project] = {
+        label: project,
+        color: CHART_COLORS[index % CHART_COLORS.length],
       };
     });
     return config;
@@ -106,6 +109,10 @@
   $effect(() => {
     loadDashboard();
   });
+
+  function gradientId(key: string): string {
+    return "grad_" + key.replace(/[^a-zA-Z0-9]/g, "_");
+  }
 </script>
 
 <div class="p-6 space-y-6">
@@ -159,16 +166,16 @@
             data={filteredData}
             x="date"
             xScale={scaleUtc()}
-            series={services.map((service) => ({
-              key: service,
-              label: service,
-              color: chartConfig[service]?.color || "hsl(var(--chart-1))",
+            series={projects.map((project) => ({
+              key: project,
+              label: project,
+              color: chartConfig[project]?.color,
             }))}
             seriesLayout="stack"
             props={{
               area: {
                 curve: curveNatural,
-                "fill-opacity": 0.6,
+                "fill-opacity": 1,
                 line: { class: "stroke-2" },
                 motion: "tween",
               },
@@ -187,18 +194,27 @@
             {#snippet marks({ series: chartSeries, getAreaProps })}
               <defs>
                 {#each chartSeries as s (s.key)}
-                  <linearGradient id="fill{s.key}" x1="0" y1="0" x2="0" y2="1">
+                  <linearGradient
+                    id={gradientId(s.key)}
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
                     <stop
-                      offset="5%"
-                      stop-color={chartConfig[s.key]?.color ||
-                        "hsl(var(--chart-1))"}
-                      stop-opacity={0.8}
+                      offset="0%"
+                      stop-color={chartConfig[s.key]?.color}
+                      stop-opacity={0.55}
                     />
                     <stop
-                      offset="95%"
-                      stop-color={chartConfig[s.key]?.color ||
-                        "hsl(var(--chart-1))"}
-                      stop-opacity={0.1}
+                      offset="45%"
+                      stop-color={chartConfig[s.key]?.color}
+                      stop-opacity={0.15}
+                    />
+                    <stop
+                      offset="100%"
+                      stop-color={chartConfig[s.key]?.color}
+                      stop-opacity={0}
                     />
                   </linearGradient>
                 {/each}
@@ -210,7 +226,10 @@
                 }}
               >
                 {#each chartSeries as s, i (s.key)}
-                  <Area {...getAreaProps(s, i)} fill="url(#fill{s.key})" />
+                  <Area
+                    {...getAreaProps(s, i)}
+                    fill="url(#{gradientId(s.key)})"
+                  />
                 {/each}
               </ChartClipPath>
             {/snippet}
