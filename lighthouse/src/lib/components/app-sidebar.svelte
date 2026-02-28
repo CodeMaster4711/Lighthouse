@@ -1,58 +1,61 @@
+<script lang="ts" module>
+  import SquareTerminalIcon from "@lucide/svelte/icons/square-terminal";
+</script>
+
 <script lang="ts">
-	import ProjectSwitcher from "./project-switcher.svelte";
-	import NavServices from "./nav-services.svelte";
-	import * as Sidebar from "$lib/components/ui/sidebar/index.js";
-	import type { ComponentProps } from "svelte";
-	import { onMount } from "svelte";
-	import { browser } from "$app/environment";
-	import { page } from "$app/stores";
+  import NavMain from "./nav-main.svelte";
+  import NavProjects from "./nav-projects.svelte";
+  import NavSecondary from "./nav-secondary.svelte";
+  import NavUser from "./nav-user.svelte";
+  import * as Sidebar from "$lib/components/ui/sidebar/index.js";
+  import CommandIcon from "@lucide/svelte/icons/command";
+  import type { ComponentProps } from "svelte";
 
-	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
+  let {
+    projects = [],
+    ref = $bindable(null),
+    ...restProps
+  }: ComponentProps<typeof Sidebar.Root> & {
+    projects?: { id?: string; name: string; url: string }[];
+  } = $props();
 
-	let projects: { id: string; name: string; services: string[] }[] = $state([]);
-	let selectedProjectId = $state('');
-	let loading = $state(true);
-
-	async function loadProjects() {
-		try {
-			const response = await fetch('/api/projects?owner_id=users:default');
-			const result = await response.json();
-			if (result.success && Array.isArray(result.data)) {
-				projects = result.data;
-				if (projects.length > 0 && !selectedProjectId) {
-					const urlParams = new URLSearchParams(browser ? window.location.search : '');
-					selectedProjectId = urlParams.get('project') || projects[0].id;
-				}
-			}
-		} catch (error) {
-			console.error('[ERROR] failed_to_load_projects error=' + (error instanceof Error ? error.message : 'unknown'));
-		} finally {
-			loading = false;
-		}
-	}
-
-	const selectedProject = $derived(
-		projects.find((p) => p.id === selectedProjectId)
-	);
-
-	onMount(() => {
-		loadProjects();
-	});
+  const navMain = $derived([
+    {
+      title: "Logs",
+      url: "/logs",
+      icon: SquareTerminalIcon,
+      isActive: true,
+      items: projects.map((project) => ({
+        title: project.name,
+        url: project.url,
+      })),
+    },
+  ]);
 </script>
 
 <Sidebar.Root bind:ref variant="inset" {...restProps}>
-	<Sidebar.Header>
-		{#if loading}
-			<div class="p-4 text-sm text-muted-foreground">Loading...</div>
-		{:else if projects.length > 0}
-			<ProjectSwitcher {projects} bind:selectedProjectId />
-		{:else}
-			<div class="p-4 text-sm text-muted-foreground">No projects found</div>
-		{/if}
-	</Sidebar.Header>
-	<Sidebar.Content>
-		{#if selectedProject && selectedProject.services.length > 0}
-			<NavServices services={selectedProject.services} projectId={selectedProject.id} />
-		{/if}
-	</Sidebar.Content>
+  <Sidebar.Header>
+    <Sidebar.Menu>
+      <Sidebar.MenuItem>
+        <Sidebar.MenuButton size="lg">
+          {#snippet child({ props })}
+            <a href="##" {...props}>
+              <div
+                class="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg"
+              >
+                <CommandIcon class="size-4" />
+              </div>
+              <div class="grid flex-1 text-start text-sm leading-tight">
+                <span class="truncate font-medium">Lighthouse</span>
+              </div>
+            </a>
+          {/snippet}
+        </Sidebar.MenuButton>
+      </Sidebar.MenuItem>
+    </Sidebar.Menu>
+  </Sidebar.Header>
+  <Sidebar.Content>
+    <NavMain items={navMain} />
+  </Sidebar.Content>
+  <Sidebar.Footer></Sidebar.Footer>
 </Sidebar.Root>
