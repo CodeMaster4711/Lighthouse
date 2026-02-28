@@ -1,179 +1,58 @@
-<script lang="ts" module>
-	import BookOpenIcon from "@lucide/svelte/icons/book-open";
-	import BotIcon from "@lucide/svelte/icons/bot";
-	import ChartPieIcon from "@lucide/svelte/icons/chart-pie";
-	import FrameIcon from "@lucide/svelte/icons/frame";
-	import LifeBuoyIcon from "@lucide/svelte/icons/life-buoy";
-	import MapIcon from "@lucide/svelte/icons/map";
-	import SendIcon from "@lucide/svelte/icons/send";
-	import Settings2Icon from "@lucide/svelte/icons/settings-2";
-	import SquareTerminalIcon from "@lucide/svelte/icons/square-terminal";
-
-	const data = {
-		user: {
-			name: "shadcn",
-			email: "m@example.com",
-			avatar: "/avatars/shadcn.jpg",
-		},
-		navMain: [
-			{
-				title: "Playground",
-				url: "#",
-				icon: SquareTerminalIcon,
-				isActive: true,
-				items: [
-					{
-						title: "History",
-						url: "#",
-					},
-					{
-						title: "Starred",
-						url: "#",
-					},
-					{
-						title: "Settings",
-						url: "#",
-					},
-				],
-			},
-			{
-				title: "Models",
-				url: "#",
-				icon: BotIcon,
-				items: [
-					{
-						title: "Genesis",
-						url: "#",
-					},
-					{
-						title: "Explorer",
-						url: "#",
-					},
-					{
-						title: "Quantum",
-						url: "#",
-					},
-				],
-			},
-			{
-				title: "Documentation",
-				url: "#",
-				icon: BookOpenIcon,
-				items: [
-					{
-						title: "Introduction",
-						url: "#",
-					},
-					{
-						title: "Get Started",
-						url: "#",
-					},
-					{
-						title: "Tutorials",
-						url: "#",
-					},
-					{
-						title: "Changelog",
-						url: "#",
-					},
-				],
-			},
-			{
-				title: "Settings",
-				url: "#",
-				icon: Settings2Icon,
-				items: [
-					{
-						title: "General",
-						url: "#",
-					},
-					{
-						title: "Team",
-						url: "#",
-					},
-					{
-						title: "Billing",
-						url: "#",
-					},
-					{
-						title: "Limits",
-						url: "#",
-					},
-				],
-			},
-		],
-		navSecondary: [
-			{
-				title: "Support",
-				url: "#",
-				icon: LifeBuoyIcon,
-			},
-			{
-				title: "Feedback",
-				url: "#",
-				icon: SendIcon,
-			},
-		],
-		projects: [
-			{
-				name: "Design Engineering",
-				url: "#",
-				icon: FrameIcon,
-			},
-			{
-				name: "Sales & Marketing",
-				url: "#",
-				icon: ChartPieIcon,
-			},
-			{
-				name: "Travel",
-				url: "#",
-				icon: MapIcon,
-			},
-		],
-	};
-</script>
-
 <script lang="ts">
-	import NavMain from "./nav-main.svelte";
-	import NavProjects from "./nav-projects.svelte";
-	import NavSecondary from "./nav-secondary.svelte";
-	import NavUser from "./nav-user.svelte";
+	import ProjectSwitcher from "./project-switcher.svelte";
+	import NavServices from "./nav-services.svelte";
 	import * as Sidebar from "$lib/components/ui/sidebar/index.js";
-	import CommandIcon from "@lucide/svelte/icons/command";
 	import type { ComponentProps } from "svelte";
+	import { onMount } from "svelte";
+	import { browser } from "$app/environment";
+	import { page } from "$app/stores";
 
 	let { ref = $bindable(null), ...restProps }: ComponentProps<typeof Sidebar.Root> = $props();
+
+	let projects: { id: string; name: string; services: string[] }[] = $state([]);
+	let selectedProjectId = $state('');
+	let loading = $state(true);
+
+	async function loadProjects() {
+		try {
+			const response = await fetch('/api/projects?owner_id=users:default');
+			const result = await response.json();
+			if (result.success && Array.isArray(result.data)) {
+				projects = result.data;
+				if (projects.length > 0 && !selectedProjectId) {
+					const urlParams = new URLSearchParams(browser ? window.location.search : '');
+					selectedProjectId = urlParams.get('project') || projects[0].id;
+				}
+			}
+		} catch (error) {
+			console.error('[ERROR] failed_to_load_projects error=' + (error instanceof Error ? error.message : 'unknown'));
+		} finally {
+			loading = false;
+		}
+	}
+
+	const selectedProject = $derived(
+		projects.find((p) => p.id === selectedProjectId)
+	);
+
+	onMount(() => {
+		loadProjects();
+	});
 </script>
 
 <Sidebar.Root bind:ref variant="inset" {...restProps}>
 	<Sidebar.Header>
-		<Sidebar.Menu>
-			<Sidebar.MenuItem>
-				<Sidebar.MenuButton size="lg">
-					{#snippet child({ props })}
-						<a href="##" {...props}>
-							<div
-								class="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg"
-							>
-								<CommandIcon class="size-4" />
-							</div>
-							<div class="grid flex-1 text-start text-sm leading-tight">
-								<span class="truncate font-medium">Acme Inc</span>
-								<span class="truncate text-xs">Enterprise</span>
-							</div>
-						</a>
-					{/snippet}
-				</Sidebar.MenuButton>
-			</Sidebar.MenuItem>
-		</Sidebar.Menu>
+		{#if loading}
+			<div class="p-4 text-sm text-muted-foreground">Loading...</div>
+		{:else if projects.length > 0}
+			<ProjectSwitcher {projects} bind:selectedProjectId />
+		{:else}
+			<div class="p-4 text-sm text-muted-foreground">No projects found</div>
+		{/if}
 	</Sidebar.Header>
 	<Sidebar.Content>
-		<NavMain items={data.navMain} />
-		<NavProjects projects={data.projects} />
-		<NavSecondary items={data.navSecondary} class="mt-auto" />
+		{#if selectedProject && selectedProject.services.length > 0}
+			<NavServices services={selectedProject.services} projectId={selectedProject.id} />
+		{/if}
 	</Sidebar.Content>
-	<Sidebar.Footer>
-		<NavUser user={data.user} />
-	</Sidebar.Footer>
 </Sidebar.Root>

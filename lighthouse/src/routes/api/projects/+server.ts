@@ -4,7 +4,8 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { createProjectSchema } from '$lib/shared/schemas';
 import { createProject, getProjectsByOwner } from '$lib/server/repositories/projects';
-import { generateApiKey } from '$lib/server/repositories/api-keys';
+import { generateApiKey, getApiKeysByProject } from '$lib/server/repositories/api-keys';
+import { getProjectServices } from '$lib/server/repositories/logs';
 import type { ApiResponse } from '$lib/shared/types';
 
 export const POST: RequestHandler = async (event) => {
@@ -43,9 +44,18 @@ export const GET: RequestHandler = async (event) => {
 
     const projects = getProjectsByOwner(ownerId);
 
+    const projectsWithDetails = projects.map(project => {
+      const apiKeys = getApiKeysByProject(project.id);
+      return {
+        ...project,
+        services: getProjectServices(project.id),
+        api_key: apiKeys.length > 0 ? apiKeys[0].key : null
+      };
+    });
+
     return json<ApiResponse>({
       success: true,
-      data: projects
+      data: projectsWithDetails
     });
   } catch (err) {
     console.error('[ERROR] projects_retrieval_failed error=' + (err instanceof Error ? err.message : 'unknown'));
