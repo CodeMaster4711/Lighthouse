@@ -1,5 +1,6 @@
 <script lang="ts" module>
   import SquareTerminalIcon from "@lucide/svelte/icons/square-terminal";
+  import BookOpenIcon from "@lucide/svelte/icons/book-open";
 </script>
 
 <script lang="ts">
@@ -30,6 +31,14 @@
       })),
     },
   ]);
+
+  const navfooter = $derived([
+    {
+      title: "Api Docs",
+      url: "https://docs.lighthouse.dev",
+      icon: BookOpenIcon,
+    },
+  ]);
 </script>
 
 <Sidebar.Root bind:ref variant="inset" {...restProps}>
@@ -39,8 +48,14 @@
         <Sidebar.MenuButton size="lg">
           {#snippet child({ props })}
             <a href="##" {...props}>
-              <div class="flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden">
-                <img src="/logo/logo.jpg" alt="Lighthouse" class="size-full object-cover" />
+              <div
+                class="flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden"
+              >
+                <img
+                  src="/logo/logo.jpg"
+                  alt="Lighthouse"
+                  class="size-full object-cover"
+                />
               </div>
               <div class="grid flex-1 text-start text-sm leading-tight">
                 <span class="truncate font-medium">Lighthouse</span>
@@ -54,5 +69,7 @@
   <Sidebar.Content>
     <NavMain items={navMain} />
   </Sidebar.Content>
-  <Sidebar.Footer></Sidebar.Footer>
+  <Sidebar.Footer>
+    <NavSecondary items={navfooter} />
+  </Sidebar.Footer>
 </Sidebar.Root>
