@@ -5,12 +5,13 @@ RUN apk add --no-cache python3 make g++
 WORKDIR /app
 
 COPY package*.json ./
+COPY lighthouse/package.json ./lighthouse/
 
 RUN npm ci
 
-COPY . .
+COPY lighthouse/ ./lighthouse/
 
-RUN npm run build
+RUN npm run build -w lighthouse
 
 FROM node:20-alpine
 
@@ -18,8 +19,9 @@ RUN apk add --no-cache python3 make g++
 
 WORKDIR /app
 
-COPY --from=builder /app/build ./build
-COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/lighthouse/build ./build
+COPY package*.json ./
+COPY lighthouse/package.json ./lighthouse/
 
 RUN npm ci --omit=dev
 
