@@ -27,6 +27,30 @@ A modern, self-hosted alternative for aggregating logs from distributed services
 - **Project Isolation**: Organize logs by projects with individual API keys
 - **Self-hosted**: Full control over your data with SQLite storage
 
+## Screenshots
+
+<div align="center">
+
+### Dashboard
+
+<img src="images/screenshot-dashboard.png" alt="Lighthouse Dashboard" width="100%" style="border-radius: 12px; border: 1px solid #e5e7eb;"/>
+
+_Real-time overview with log frequency chart, project stats and key metrics_
+
+### Log Explorer
+
+<img src="images/screenshot-logs.png" alt="Log Explorer" width="100%" style="border-radius: 12px; border: 1px solid #e5e7eb;"/>
+
+_Filter and search through all log entries across projects and services_
+
+### Log Detail
+
+<img src="images/screenshot-logs-detail.png" alt="Log Detail View" width="100%" style="border-radius: 12px; border: 1px solid #e5e7eb;"/>
+
+_Expand individual entries to inspect full messages and structured metadata_
+
+</div>
+
 ## Quick Start
 
 ### Docker (Recommended)
