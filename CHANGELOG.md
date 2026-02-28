@@ -1,3 +1,10 @@
+## [1.2.6](https://github.com/CodeMaster4711/Lighthouse/compare/v1.2.5...v1.2.6) (2026-02-28)
+
+
+### Bug Fixes
+
+* add missing api/logs routes and logs page ignored by gitignore ([509b0ea](https://github.com/CodeMaster4711/Lighthouse/commit/509b0ea695d82f01a800d46855d2818488f35f78))
+
 ## [1.2.5](https://github.com/CodeMaster4711/Lighthouse/compare/v1.2.4...v1.2.5) (2026-02-28)
 
 
