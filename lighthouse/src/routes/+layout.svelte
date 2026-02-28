@@ -6,7 +6,7 @@
   import { Separator } from "$lib/components/ui/separator/index.js";
   import * as Sidebar from "$lib/components/ui/sidebar/index.js";
 
-  let { children } = $props();
+  let { data, children } = $props();
 
   onMount(() => {
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
@@ -38,7 +38,7 @@
 </svelte:head>
 
 <Sidebar.Provider>
-  <AppSidebar />
+  <AppSidebar projects={data.projects} />
   <Sidebar.Inset>
     <header class="flex h-16 shrink-0 items-center gap-2">
       <div class="flex items-center gap-2 px-4">
@@ -62,7 +62,7 @@
         </Breadcrumb.Root>
       </div>
     </header>
-    <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
+    <div class="flex flex-1 flex-col p-4">
       {@render children()}
     </div>
   </Sidebar.Inset>

@@ -69,6 +69,38 @@ export function getLogs(query: GetLogsQuery, projectId: string): LogEntry[] {
   }));
 }
 
+export function getLogsCount(query: GetLogsQuery, projectId: string): number {
+  const db = getDB();
+
+  let sql = 'SELECT COUNT(*) as count FROM logs WHERE project_id = ?';
+  const params: any[] = [projectId];
+
+  if (query.level) {
+    sql += ' AND level = ?';
+    params.push(query.level);
+  }
+
+  if (query.source) {
+    sql += ' AND source = ?';
+    params.push(query.source);
+  }
+
+  if (query.start_date) {
+    sql += ' AND timestamp >= ?';
+    params.push(query.start_date);
+  }
+
+  if (query.end_date) {
+    sql += ' AND timestamp <= ?';
+    params.push(query.end_date);
+  }
+
+  const stmt = db.prepare(sql);
+  const result = stmt.get(...params) as { count: number };
+
+  return result.count;
+}
+
 export function getLogById(id: string, projectId: string): LogEntry | null {
   const db = getDB();
 
@@ -81,4 +113,62 @@ export function getLogById(id: string, projectId: string): LogEntry | null {
     ...row,
     metadata: row.metadata ? JSON.parse(row.metadata) : undefined
   };
+}
+
+export interface LogStatistics {
+  hour: string;
+  count: number;
+}
+
+export function getLogStatistics(projectId: string, hours: number = 24): LogStatistics[] {
+  const db = getDB();
+
+  const stmt = db.prepare(`
+    SELECT
+      strftime('%Y-%m-%d %H:00:00', timestamp) as hour,
+      COUNT(*) as count
+    FROM logs
+    WHERE project_id = ?
+      AND timestamp >= datetime('now', '-' || ? || ' hours')
+    GROUP BY hour
+    ORDER BY hour ASC
+  `);
+
+  return stmt.all(projectId, hours) as LogStatistics[];
+}
+
+export interface LogDistribution {
+  level: string;
+  count: number;
+  percentage: number;
+}
+
+export function getLogDistribution(projectId: string): LogDistribution[] {
+  const db = getDB();
+
+  const stmt = db.prepare(`
+    SELECT
+      level,
+      COUNT(*) as count,
+      ROUND(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM logs WHERE project_id = ?), 2) as percentage
+    FROM logs
+    WHERE project_id = ?
+    GROUP BY level
+    ORDER BY count DESC
+  `);
+
+  return stmt.all(projectId, projectId) as LogDistribution[];
+}
+
+export function getProjectServices(projectId: string): string[] {
+  const db = getDB();
+
+  const stmt = db.prepare(`
+    SELECT DISTINCT source
+    FROM logs
+    WHERE project_id = ?
+    ORDER BY source ASC
+  `);
+
+  return (stmt.all(projectId) as { source: string }[]).map(row => row.source);
 }
