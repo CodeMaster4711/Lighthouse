@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as Table from "$lib/components/ui/table/index.js";
-	import * as Badge from "$lib/components/ui/badge/index.js";
+	import { Badge } from "$lib/components/ui/badge/index.js";
 	import { Button } from "$lib/components/ui/button/index.js";
 	import ChevronLeftIcon from "@lucide/svelte/icons/chevron-left";
 	import ChevronRightIcon from "@lucide/svelte/icons/chevron-right";
